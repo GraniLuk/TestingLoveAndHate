@@ -6,49 +6,46 @@ namespace TestingLoveAndHate {
         private readonly IMessageBus _messageBus;
         private readonly IEscalationManager _escalationManager;
         private readonly IEmailSender _emailSender;
-        private readonly IConfiguration _configuration;
 
-        public LeaveService(ILeaveDatabase database, IMessageBus messageBus, IEmailSender emailSender, IEscalationManager escalationManager, IConfiguration configuration) {
+        public LeaveService(ILeaveDatabase database, IMessageBus messageBus, IEmailSender emailSender, IEscalationManager escalationManager) {
             _database = database;
             _messageBus = messageBus;
             _escalationManager = escalationManager;
             _emailSender = emailSender;
-            _configuration = configuration;
         }
 
         public Result RequestPaidDaysOff(int days, long employeeId) {
-            if (days < 0) {
-                throw new ArgumentException();
-            }
+            validate(days);
 
+            //load
             object[] employeeData = _database.FindByEmployeeId(employeeId);
-
             string employeeStatus = (string)employeeData[0];
-
             int daysSoFar = (int)employeeData[1];
-            
-            Result result;
-            if (daysSoFar + days > _configuration.GetMaxDays()) {
-                if (employeeStatus == "PERFORMER" && daysSoFar + days < _configuration.GetMaxDaysForPerformers()) {
-                    result = Result.Manual;
+            var something = new Something(employeeId, employeeStatus, daysSoFar);
+
+            Result result = something.RequestDaysOff(days);
+
+            switch (result) {
+                case Result.Manual:
                     _escalationManager.NotifyNewPendingRequest(employeeId);
-                } else {
-                    result = Result.Denied;
-                    _emailSender.Send("Next time!");
-                }
-            } else {
-                if (employeeStatus == "SLACKER") {
-                    result = Result.Denied;
-                    _emailSender.Send("Next time!");
-                } else {
+                    break;
+                case Result.Approved:
                     employeeData[1] = daysSoFar + days;
-                    result = Result.Approved;
                     _database.Save(employeeData);
                     _messageBus.SendEvent("Request approved");
-                }
+                    break;
+                case Result.Denied:
+                    _emailSender.Send("Next time!");
+                    break;
             }
 
             return result;
+        }
+
+        private static void validate(int days) {
+            if (days < 0) {
+                throw new ArgumentException();
+            }
         }
     }
 }
