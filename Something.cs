@@ -12,7 +12,7 @@ namespace TestingLoveAndHate {
             this.daysSoFar = daysSoFar;
         }
 
-        internal Result RequestDaysOff(int days) {
+        public Result RequestDaysOff(int days) {
             if (daysSoFar + days > 26) {
                 if (employeeStatus == "PERFORMER" && daysSoFar + days < 45) {
                     return Result.Manual;
