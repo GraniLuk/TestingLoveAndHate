@@ -6,12 +6,14 @@ namespace TestingLoveAndHate {
         private readonly IMessageBus _messageBus;
         private readonly IEscalationManager _escalationManager;
         private readonly IEmailSender _emailSender;
+        private readonly IConfiguration _configuration;
 
-        public LeaveService(ILeaveDatabase database, IMessageBus messageBus, IEmailSender emailSender, IEscalationManager escalationManager) {
+        public LeaveService(ILeaveDatabase database, IMessageBus messageBus, IEmailSender emailSender, IEscalationManager escalationManager, IConfiguration configuration) {
             _database = database;
             _messageBus = messageBus;
             _escalationManager = escalationManager;
             _emailSender = emailSender;
+            _configuration = configuration;
         }
 
         public Result RequestPaidDaysOff(int days, long employeeId) {
@@ -24,10 +26,10 @@ namespace TestingLoveAndHate {
             string employeeStatus = (string)employeeData[0];
 
             int daysSoFar = (int)employeeData[1];
-
+            
             Result result;
-            if (daysSoFar + days > 26) {
-                if (employeeStatus == "PERFORMER" && daysSoFar + days < 45) {
+            if (daysSoFar + days > _configuration.GetMaxDays()) {
+                if (employeeStatus == "PERFORMER" && daysSoFar + days < _configuration.GetMaxDaysForPerformers()) {
                     result = Result.Manual;
                     _escalationManager.NotifyNewPendingRequest(employeeId);
                 } else {
