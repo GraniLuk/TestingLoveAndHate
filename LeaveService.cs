@@ -18,10 +18,7 @@ namespace TestingLoveAndHate {
             validate(days);
 
             //load
-            object[] employeeData = _database.FindByEmployeeId(employeeId);
-            string employeeStatus = (string)employeeData[0];
-            int daysSoFar = (int)employeeData[1];
-            var something = new Something(employeeId, employeeStatus, daysSoFar);
+            var something = _database.FindByEmployeeId(employeeId);
 
             Result result = something.RequestDaysOff(days);
 
@@ -30,8 +27,7 @@ namespace TestingLoveAndHate {
                     _escalationManager.NotifyNewPendingRequest(employeeId);
                     break;
                 case Result.Approved:
-                    employeeData[1] = daysSoFar + days;
-                    _database.Save(employeeData);
+                    _database.Save(something);
                     _messageBus.SendEvent("Request approved");
                     break;
                 case Result.Denied:

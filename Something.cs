@@ -1,7 +1,7 @@
 ﻿using System;
 
 namespace TestingLoveAndHate {
-    internal class Something {
+    public class Something : IEquatable<Something> {
         private long employeeId;
         private string employeeStatus;
         private int daysSoFar;
@@ -23,9 +23,17 @@ namespace TestingLoveAndHate {
                 if (employeeStatus == "SLACKER") {
                     return Result.Denied;
                 } else {
+                    daysSoFar += days;
                     return Result.Approved;
+                   
                 }
             }
+        }
+
+        public bool Equals(Something other) {
+            return employeeId == other.employeeId &&
+            employeeStatus == other.employeeStatus &&
+            daysSoFar == other.daysSoFar;
         }
     }
 }

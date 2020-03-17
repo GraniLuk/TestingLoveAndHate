@@ -1,6 +1,6 @@
 ﻿namespace TestingLoveAndHate {
     public interface ILeaveDatabase {
-        object[] FindByEmployeeId(long employeeId);
-        void Save(object[] employeeData);
+        Something FindByEmployeeId(long employeeId);
+        void Save(Something employeeData);
     }
 }
