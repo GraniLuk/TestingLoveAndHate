@@ -32,7 +32,7 @@ namespace TestingLoveAndHate {
                     _escalationManager.NotifyNewPendingRequest(employeeId);
                 } else {
                     result = Result.Denied;
-                    _emailSender.Send("next time");
+                    _emailSender.Send("Next time");
                 }
             } else {
                 if (employeeStatus == "SLACKER") {
